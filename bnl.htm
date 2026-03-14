@@ -1,0 +1,789 @@
+<meta http-equiv="X-UA-Compatible" content="IE-edge>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>柏努利方程实验 - 全功能数据平台</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: "Microsoft Yahei", sans-serif;
+    }
+    body {
+      max-width: 1400px;
+      margin: 20px auto;
+      padding: 0 20px;
+      line-height: 1.6;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+    h1 {
+      text-align: center;
+      color: white;
+      margin-bottom: 30px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+      font-size: 2.5em;
+    }
+    .module {
+      margin: 25px 0;
+      padding: 25px;
+      border-radius: 15px;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    }
+    .module h2 {
+      color: #2c3e50;
+      margin-bottom: 20px;
+      border-left: 5px solid #667eea;
+      padding-left: 15px;
+      font-size: 1.5em;
+    }
+    .data-group {
+      margin: 20px 0;
+      padding: 20px;
+      border-radius: 12px;
+      background: white;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.07);
+      border: 1px solid #e0e0e0;
+      transition: transform 0.2s;
+    }
+    .data-group:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+    }
+    .data-group-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #f0f0f0;
+    }
+    .data-group-header h3 {
+      color: #667eea;
+      font-size: 1.3em;
+    }
+    .btn-group {
+      display: flex;
+      gap: 12px;
+      margin: 20px 0;
+      flex-wrap: wrap;
+    }
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    button:active {
+      transform: translateY(0);
+    }
+    .btn-add { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+    .btn-remove { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; }
+    .btn-delete { background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%); color: white; }
+    .btn-calculate { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; }
+    .btn-draw-all { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white; }
+    .btn-export { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: white; }
+    .btn-import { background: linear-gradient(135deg, #30cfd0 0%, #330867 100%); color: white; }
+    .btn-report { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); color: #333; }
+    .input-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin: 20px 0;
+    }
+    .input-item {
+      display: flex;
+      flex-direction: column;
+    }
+    .input-item label {
+      font-size: 13px;
+      color: #555;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+    .input-item input {
+      padding: 10px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: border-color 0.3s;
+    }
+    .input-item input:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      margin: 20px 0;
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    table th, table td {
+      padding: 12px;
+      text-align: center;
+      border-bottom: 1px solid #eee;
+    }
+    table th { 
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+      color: white;
+      font-weight: 600;
+    }
+    table tr:hover {
+      background: #f8f9ff;
+    }
+    table input {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      text-align: center;
+    }
+    #chart-container {
+      height: 500px;
+      margin: 20px 0;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+    .tab-group {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .tab {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      background: #f0f0f0;
+      color: #666;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+    .tab.active {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+    .tab:hover:not(.active) {
+      background: #e0e0e0;
+    }
+    #file-input { display: none; }
+    .results-table {
+      margin-top: 15px;
+      font-size: 0.9em;
+    }
+    .results-table th {
+      background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    }
+    .alert {
+      padding: 15px;
+      border-radius: 8px;
+      margin: 10px 0;
+      display: none;
+    }
+    .alert-success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    .stats-card {
+      display: inline-block;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 15px 25px;
+      border-radius: 10px;
+      margin: 10px 10px 10px 0;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .stats-card h4 {
+      font-size: 0.9em;
+      opacity: 0.9;
+      margin-bottom: 5px;
+    }
+    .stats-card p {
+      font-size: 1.5em;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>📊 柏努利方程实验 - 全功能数据平台</h1>
+
+  <div class="module">
+    <h2>实验数据记录</h2>
+    <div class="btn-group">
+      <button class="btn-add" onclick="addDataGroup()">➕ 添加实验组</button>
+      <button class="btn-import" onclick="document.getElementById('file-input').click()">📥 导入CSV数据</button>
+      <button class="btn-draw-all" onclick="drawAllGroups()">📈 绘制所有组对比图</button>
+      <button class="btn-export" onclick="exportData()">📤 导出CSV数据</button>
+      <button class="btn-report" onclick="generateReport()">📄 生成实验报告</button>
+    </div>
+    <!-- 关键修复：添加隐藏的file input -->
+    <input type="file" id="file-input" accept=".csv" onchange="importData(event)">
+    <div id="alert-box" class="alert"></div>
+    <div id="data-container"></div>
+  </div>
+
+  <div class="module">
+    <h2>实验结果与图表分析</h2>
+    <div class="tab-group">
+      <div class="tab active" onclick="switchTab('total', this)">总水头线</div>
+      <div class="tab" onclick="switchTab('pressure', this)">测压管水头线</div>
+      <div class="tab" onclick="switchTab('velocity', this)">流速水头</div>
+      <div class="tab" onclick="switchTab('position', this)">位置水头线</div>
+    </div>
+    <!-- 关键修复：使用canvas而不是div作为Chart.js容器 -->
+    <div id="chart-container">
+      <canvas id="chartCanvas"></canvas>
+    </div>
+  </div>
+
+  <div class="module">
+    <h2>实验报告</h2>
+    <div id="report-container">
+      <p style="color: #999; text-align: center; padding: 40px;">点击"生成实验报告"按钮查看详细分析报告</p>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    let groups = [];
+    let chart = null;
+    let currentTab = 'total';
+    const g = 9.81;
+
+    window.onload = () => {
+      addDataGroup();
+      initChart();
+    };
+
+    // 初始化Chart.js图表
+    function initChart() {
+      const ctx = document.getElementById('chartCanvas').getContext('2d');
+      chart = new Chart(ctx, {
+        type: 'line',
+        data: { labels: [], datasets: [] },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: {
+            mode: 'index',
+            intersect: false,
+          },
+          plugins: {
+            title: {
+              display: true,
+              text: '柏努利方程水头分布图',
+              font: { size: 18, weight: 'bold' }
+            },
+            legend: {
+              position: 'top',
+              labels: { usePointStyle: true, padding: 20 }
+            },
+            tooltip: {
+              backgroundColor: 'rgba(0,0,0,0.8)',
+              padding: 12,
+              cornerRadius: 8,
+              callbacks: {
+                label: (context) => `${context.dataset.label}: ${context.parsed.y.toFixed(4)} m`
+              }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: false,
+              title: { display: true, text: '水头高度 (m)', font: { weight: 'bold' } },
+              grid: { color: 'rgba(0,0,0,0.05)' }
+            },
+            x: {
+              title: { display: true, text: '测点位置', font: { weight: 'bold' } },
+              grid: { display: false }
+            }
+          },
+          elements: {
+            line: { tension: 0.4, borderWidth: 3 },
+            point: { radius: 6, hoverRadius: 8, borderWidth: 2, backgroundColor: 'white' }
+          }
+        }
+      });
+    }
+
+    function showAlert(message, type = 'success') {
+      const alert = document.getElementById('alert-box');
+      alert.textContent = message;
+      alert.className = `alert alert-${type}`;
+      alert.style.display = 'block';
+      setTimeout(() => alert.style.display = 'none', 3000);
+    }
+
+    function addDataGroup() {
+      const id = groups.length > 0 ? Math.max(...groups.map(g => g.id)) + 1 : 1;
+      groups.push({
+        id,
+        name: `实验组 ${id}`,
+        Q: 1.5,
+        points: [
+          { no: 1, d: 20, z: 0.5, h: 0.35 },
+          { no: 2, d: 15, z: 0.4, h: 0.38 },
+          { no: 3, d: 10, z: 0.3, h: 0.42 },
+          { no: 4, d: 15, z: 0.4, h: 0.38 },
+          { no: 5, d: 20, z: 0.5, h: 0.35 }
+        ]
+      });
+      renderGroups();
+      showAlert(`已添加实验组 ${id}`);
+    }
+
+    function addPoint(groupId) {
+      const group = groups.find(x => x.id === groupId);
+      if (!group) return;
+      const newNo = group.points.length + 1;
+      const lastPoint = group.points[group.points.length - 1];
+      group.points.push({
+        no: newNo,
+        d: lastPoint ? lastPoint.d : 10,
+        z: lastPoint ? lastPoint.z : 0,
+        h: lastPoint ? lastPoint.h : 0
+      });
+      renderGroups();
+    }
+
+    function removeLastPoint(groupId) {
+      const group = groups.find(x => x.id === groupId);
+      if (!group || group.points.length <= 3) {
+        showAlert('每组至少需要保留3个测点', 'error');
+        return;
+      }
+      group.points.pop();
+      renderGroups();
+    }
+
+    function deleteGroup(id) {
+      if (confirm('确定要删除这个实验组吗？')) {
+        groups = groups.filter(x => x.id !== id);
+        renderGroups();
+        showAlert('实验组已删除');
+      }
+    }
+
+    function updateGroupName(id, val) {
+      const group = groups.find(x => x.id === id);
+      if (group) group.name = val;
+    }
+
+    function updateGroupQ(id, val) {
+      const group = groups.find(x => x.id === id);
+      if (group) group.Q = parseFloat(val) || 0;
+    }
+
+    function updatePoint(gid, no, key, val) {
+      const group = groups.find(x => x.id === gid);
+      if (!group) return;
+      const p = group.points.find(x => x.no === no);
+      if (p) p[key] = parseFloat(val) || 0;
+    }
+
+    function renderGroups() {
+      const container = document.getElementById('data-container');
+      container.innerHTML = '';
+      
+      groups.forEach(g => {
+        const div = document.createElement('div');
+        div.className = 'data-group';
+        
+        // 计算结果表格
+        let resultsHtml = '';
+        if (g.points[0]?.v !== undefined) {
+          resultsHtml = `
+            <table class="results-table">
+              <tr>
+                <th>测点</th>
+                <th>流速(m/s)</th>
+                <th>流速水头(m)</th>
+                <th>总水头(m)</th>
+              </tr>
+              ${g.points.map(p => `
+                <tr>
+                  <td>${p.no}</td>
+                  <td>${p.v.toFixed(3)}</td>
+                  <td>${p.vh.toFixed(4)}</td>
+                  <td><strong>${p.total.toFixed(4)}</strong></td>
+                </tr>
+              `).join('')}
+            </table>
+          `;
+        }
+
+        div.innerHTML = `
+          <div class="data-group-header">
+            <input type="text" value="${g.name}" 
+              style="font-size: 1.3em; border: none; border-bottom: 2px solid #667eea; background: transparent; color: #667eea; font-weight: bold; width: 200px;"
+              onchange="updateGroupName(${g.id}, this.value)">
+            <button class="btn-delete" onclick="deleteGroup(${g.id})">🗑️ 删除本组</button>
+          </div>
+          
+          <div class="input-grid">
+            <div class="input-item">
+              <label>体积流量 Q (m³/h)</label>
+              <input type="number" step="0.01" value="${g.Q}" 
+                oninput="updateGroupQ(${g.id}, this.value)">
+            </div>
+            <div class="stats-card" style="background: #f8f9ff; color: #667eea;">
+              <h4>测点数量</h4>
+              <p>${g.points.length} 个</p>
+            </div>
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th>测点编号</th>
+                <th>管径 d (mm)</th>
+                <th>位置高度 z (m)</th>
+                <th>测压管水头 h (m)</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${g.points.map(p => `
+                <tr>
+                  <td><strong>#${p.no}</strong></td>
+                  <td><input type="number" step="0.1" value="${p.d}" 
+                    oninput="updatePoint(${g.id},${p.no},'d',this.value)"></td>
+                  <td><input type="number" step="0.001" value="${p.z}" 
+                    oninput="updatePoint(${g.id},${p.no},'z',this.value)"></td>
+                  <td><input type="number" step="0.001" value="${p.h}" 
+                    oninput="updatePoint(${g.id},${p.no},'h',this.value)"></td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+
+          <div class="btn-group">
+            <button class="btn-add" onclick="addPoint(${g.id})">➕ 添加测点</button>
+            <button class="btn-remove" onclick="removeLastPoint(${g.id})">➖ 删除测点</button>
+            <button class="btn-calculate" onclick="calcGroup(${g.id})">🧮 计算水头</button>
+            <button class="btn-draw-all" onclick="drawSingleGroup(${g.id})">📊 绘制曲线</button>
+          </div>
+          
+          ${resultsHtml}
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function calcGroup(id) {
+      const group = groups.find(x => x.id === id);
+      if (!group) return;
+      
+      const Q = group.Q / 3600; // 转换为 m³/s
+      
+      group.points.forEach(p => {
+        const d = p.d / 1000; // 转换为 m
+        const A = Math.PI * d * d / 4;
+        const v = Q / A;
+        p.v = v;
+        p.vh = v * v / (2 * g);
+        p.total = p.z + p.h + p.vh;
+      });
+      
+      renderGroups();
+      showAlert(`${group.name} 计算完成！`);
+      return group;
+    }
+
+    function switchTab(tab, element) {
+      currentTab = tab;
+      document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+      element.classList.add('active');
+      
+      // 如果有数据，自动刷新图表
+      if (groups.length > 0 && groups[0].points[0]?.total !== undefined) {
+        drawAllGroups();
+      }
+    }
+
+    function getTabTitle() {
+      const titles = {
+        'total': '总水头线 (H = z + p/ρg + v²/2g)',
+        'pressure': '测压管水头线 (H_p = z + p/ρg)',
+        'velocity': '流速水头 (H_v = v²/2g)',
+        'position': '位置水头线 (z)'
+      };
+      return titles[currentTab] || '水头分布';
+    }
+
+    function drawAllGroups() {
+      // 先计算所有组
+      groups.forEach(g => {
+        if (!g.points[0]?.total !== undefined) {
+          calcGroup(g.id);
+        }
+      });
+      drawChart(groups);
+    }
+
+    function drawSingleGroup(id) {
+      const group = calcGroup(id);
+      drawChart([group]);
+    }
+
+    function drawChart(showGroups) {
+      if (!chart) initChart();
+      
+      const colors = [
+        '#667eea', '#f093fb', '#4facfe', '#43e97b', 
+        '#fa709a', '#fee140', '#30cfd0', '#a8edea'
+      ];
+      
+      const labels = showGroups[0].points.map(p => `测点 ${p.no}`);
+      
+      chart.data.labels = labels;
+      chart.data.datasets = showGroups.map((g, i) => ({
+        label: g.name,
+        data: g.points.map(p => {
+          if (currentTab === 'total') return p.total;
+          if (currentTab === 'pressure') return p.h;
+          if (currentTab === 'velocity') return p.vh;
+          return p.z;
+        }),
+        borderColor: colors[i % colors.length],
+        backgroundColor: colors[i % colors.length],
+        pointBackgroundColor: 'white',
+        pointBorderColor: colors[i % colors.length],
+        fill: false,
+        tension: 0.4
+      }));
+      
+      chart.options.plugins.title.text = getTabTitle();
+      chart.update('active');
+    }
+
+    function exportData() {
+      let csv = "\ufeff实验组,测点编号,管径d(mm),位置高度z(m),测压管水头h(m),流速(m/s),流速水头(m),总水头(m),流量Q(m³/h)\n";
+      
+      groups.forEach(g => {
+        // 确保数据已计算
+        if (!g.points[0]?.total !== undefined) {
+          calcGroup(g.id);
+        }
+        
+        g.points.forEach(p => {
+          csv += `${g.name},${p.no},${p.d},${p.z},${p.h},${p.v?.toFixed(4) || 0},${p.vh?.toFixed(6) || 0},${p.total?.toFixed(6) || 0},${g.Q}\n`;
+        });
+      });
+      
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `柏努利实验数据_${new Date().toLocaleDateString()}.csv`;
+      link.click();
+      showAlert('数据导出成功！');
+    }
+
+    function importData(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const text = event.target.result;
+          const lines = text.split('\n').filter(line => line.trim());
+          
+          // 解析CSV
+          const data = [];
+          for (let i = 1; i < lines.length; i++) {
+            const values = lines[i].split(',');
+            if (values.length >= 5) {
+              data.push({
+                group: values[0],
+                no: parseInt(values[1]),
+                d: parseFloat(values[2]),
+                z: parseFloat(values[3]),
+                h: parseFloat(values[4]),
+                Q: parseFloat(values[8]) || 1.5
+              });
+            }
+          }
+          
+          // 按组分类
+          const groupMap = {};
+          data.forEach(row => {
+            if (!groupMap[row.group]) {
+              groupMap[row.group] = { name: row.group, Q: row.Q, points: [] };
+            }
+            groupMap[row.group].points.push({
+              no: row.no,
+              d: row.d,
+              z: row.z,
+              h: row.h
+            });
+          });
+          
+          // 更新groups
+          groups = Object.values(groupMap).map((g, idx) => ({
+            id: idx + 1,
+            name: g.name,
+            Q: g.Q,
+            points: g.points.sort((a, b) => a.no - b.no)
+          }));
+          
+          renderGroups();
+          showAlert(`成功导入 ${groups.length} 个实验组，共 ${data.length} 个测点数据`);
+          
+          // 自动绘制
+          if (groups.length > 0) drawAllGroups();
+          
+        } catch (err) {
+          showAlert('导入失败：' + err.message, 'error');
+        }
+      };
+      reader.readAsText(file);
+      e.target.value = ''; // 重置input
+    }
+
+    function generateReport() {
+      // 确保所有组都已计算
+      groups.forEach(g => {
+        if (!g.points[0]?.total !== undefined) {
+          calcGroup(g.id);
+        }
+      });
+      
+      // 计算统计数据
+      let totalHeadLoss = 0;
+      let maxVelocity = 0;
+      let minTotalHead = Infinity;
+      let maxTotalHead = -Infinity;
+      let groupStats = [];
+      
+      groups.forEach(g => {
+        const heads = g.points.map(p => p.total);
+        const maxH = Math.max(...heads);
+        const minH = Math.min(...heads);
+        const loss = maxH - minH;
+        const maxV = Math.max(...g.points.map(p => p.v));
+        
+        totalHeadLoss += loss;
+        maxVelocity = Math.max(maxVelocity, maxV);
+        minTotalHead = Math.min(minTotalHead, minH);
+        maxTotalHead = Math.max(maxTotalHead, maxH);
+        
+        groupStats.push({
+          name: g.name,
+          loss: loss,
+          maxV: maxV,
+          avgHead: heads.reduce((a, b) => a + b, 0) / heads.length
+        });
+      });
+      
+      const avgLoss = totalHeadLoss / groups.length;
+      const headDiff = maxTotalHead - minTotalHead;
+      
+      const reportHtml = `
+        <div style="background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+          <h3 style="color: #667eea; margin-bottom: 20px; border-bottom: 3px solid #667eea; padding-bottom: 10px;">
+            📋 柏努利方程实验报告
+          </h3>
+          
+          <div style="margin-bottom: 25px;">
+            <h4 style="color: #333; margin-bottom: 15px;">一、实验原理</h4>
+            <div style="background: #f8f9ff; padding: 15px; border-radius: 8px; font-family: 'Courier New', monospace;">
+              <p style="margin: 5px 0;"><strong>柏努利方程：</strong> z₁ + p₁/ρg + v₁²/2g = z₂ + p₂/ρg + v₂²/2g + h_f</p>
+              <p style="margin: 5px 0; color: #666; font-size: 0.9em;">其中：z 为位置水头，p/ρg 为压力水头，v²/2g 为流速水头，h_f 为水头损失</p>
+            </div>
+          </div>
+
+          <div style="margin-bottom: 25px;">
+            <h4 style="color: #333; margin-bottom: 15px;">二、实验概况</h4>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+              <div class="stats-card">
+                <h4>实验组数</h4>
+                <p>${groups.length} 组</p>
+              </div>
+              <div class="stats-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                <h4>总测点数</h4>
+                <p>${groups.reduce((a, g) => a + g.points.length, 0)} 个</p>
+              </div>
+              <div class="stats-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                <h4>最大流速</h4>
+                <p>${maxVelocity.toFixed(3)} m/s</p>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-bottom: 25px;">
+            <h4 style="color: #333; margin-bottom: 15px;">三、各组数据分析</h4>
+            <table style="width: 100%; border-collapse: collapse;">
+              <thead>
+                <tr style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                  <th style="padding: 12px;">实验组</th>
+                  <th style="padding: 12px;">流量 (m³/h)</th>
+                  <th style="padding: 12px;">平均总水头 (m)</th>
+                  <th style="padding: 12px;">水头损失 (m)</th>
+                  <th style="padding: 12px;">最大流速 (m/s)</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${groupStats.map(s => `
+                  <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 10px;"><strong>${s.name}</strong></td>
+                    <td style="padding: 10px;">${groups.find(g => g.name === s.name).Q}</td>
+                    <td style="padding: 10px;">${s.avgHead.toFixed(4)}</td>
+                    <td style="padding: 10px; color: ${s.loss > 0.1 ? '#e74c3c' : '#27ae60'}">${s.loss.toFixed(4)}</td>
+                    <td style="padding: 10px;">${s.maxV.toFixed(3)}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+
+          <div style="margin-bottom: 25px;">
+            <h4 style="color: #333; margin-bottom: 15px;">四、实验结论</h4>
+            <div style="background: ${headDiff < 0.05 ? '#d4edda' : '#fff3cd'}; padding: 20px; border-radius: 8px; border-left: 5px solid ${headDiff < 0.05 ? '#28a745' : '#ffc107'};">
+              <p style="margin: 10px 0; line-height: 1.8;">
+                <strong>验证结果：</strong>${headDiff < 0.05 ? '✅ 实验数据良好，总水头基本保持恒定，柏努利方程得到验证。' : '⚠️ 实验数据存在一定偏差，总水头变化较明显，可能存在测量误差或能量损失。'}
+              </p>
+              <p style="margin: 10px 0; line-height: 1.8;">
+                <strong>数据分析：</strong>各实验组平均水头损失为 ${avgLoss.toFixed(4)} m，最大总水头差为 ${headDiff.toFixed(4)} m。
+                ${avgLoss < 0.02 ? '水头损失较小，系统能量守恒良好。' : '水头损失相对明显，建议检查管路阻力或测量精度。'}
+              </p>
+              <p style="margin: 10px 0; line-height: 1.8;">
+                <strong>流速分布：</strong>管径变化导致流速显著变化，在管径最小处流速达到最大值 ${maxVelocity.toFixed(3)} m/s，
+                对应的流速水头也最大，符合连续性方程和柏努利原理。
+              </p>
+            </div>
+          </div>
+
+          <div style="text-align: center; color: #999; font-size: 0.9em; margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+            报告生成时间：${new Date().toLocaleString('zh-CN')}
+          </div>
+        </div>
+      `;
+      
+      document.getElementById('report-container').innerHTML = reportHtml;
+      showAlert('实验报告生成完成！');
+    }
+  </script>
+</body>
+</html>
